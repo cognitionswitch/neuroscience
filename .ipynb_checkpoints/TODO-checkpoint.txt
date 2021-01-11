@@ -1,0 +1,5 @@
+1. Write doc strings for Neuron, Outgrowth classes 
+2. Demo additional properties as outlined in The Rewiring Brain
+3. Add Latex equations to demo 
+4. Add neurogenesis feature
+5. Add dynamic position capability?
