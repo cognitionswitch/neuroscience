@@ -63,23 +63,30 @@ class Neuron:
         - outgrowth function parameter: scaling parameter controlling steepness of growth function method 
     """
     
-    def __init__(self, pos:tuple=None, radius:float=0.25, valence:bool=True, potential:float=0.0,  
-                 theta:float=0.5, alpha:float=0.1, rho:float=0.0001, epsilon:float=0.6, beta:float=0.1):
+    def __init__(self, position:tuple=None, 
+                 radius:float=0.25, 
+                 valence:bool=True, 
+                 potential:float=0.0,  
+                 theta:float=0.5, 
+                 alpha:float=0.1, 
+                 rho:float=0.0001, 
+                 epsilon:float=0.6, 
+                 beta:float=0.1):
         
         assert self._validate_params(alpha, beta, epsilon, theta, rho)[0],\
         'alpha, beta, epsilon, theta, rho must be of type "float"'
         assert self._validate_params(alpha, beta, epsilon, theta, rho)[1],\
         'slope parameters alpha, beta must non-zero'
-        assert self._validate_attrib(pos, radius, valence, potential)[0],\
+        assert self._validate_attrib(position, radius, valence, potential)[0],\
         'position must be tuple of ints or floats'
-        assert self._validate_attrib(pos, radius, valence, potential)[1],\
+        assert self._validate_attrib(position, radius, valence, potential)[1],\
         'radius must be float or int and greater than 0'
-        assert self._validate_attrib(pos, radius, valence, potential)[2],\
+        assert self._validate_attrib(position, radius, valence, potential)[2],\
         'valence must be boolean, 1, or -1'
-        assert self._validate_attrib(pos, radius, valence, potential)[3],\
+        assert self._validate_attrib(position, radius, valence, potential)[3],\
         'potential must be float and less than 1'
         
-        self.position = np.random.multivariate_normal([0,0], np.eye(2)) if pos is None else pos
+        self.position = np.random.multivariate_normal([0,0], np.eye(2)) if position is None else position
         self.radius = radius
         self.valence = 1 if valence else -1
         self.potential = potential
@@ -92,14 +99,15 @@ class Neuron:
         
     def __repr__(self):
         return (
-            ('Neuron(\n pos={pos}, radius={rad},\n' +
-             ' valence={val}, potential={pot},\n' +
-             ' theta={theta}, alpha={alpha},\n' +
-             ' rho={rho}, epsilon={eps}, beta={beta} \n)')
-            .format(pos=self.position, rad=self.radius, 
-                    val=self.valence, pot=self.potential, 
-                    theta=self.theta, alpha=self.alpha, 
-                    rho=self.rho, eps=self.epsilon, beta=self.beta)
+            (f'Neuron(\n pos = {self.position},\n' + 
+             f' radius = {self.radius},\n' +
+             f' valence = {self.valence},\n' +
+             f' potential = {self.potential},\n' +
+             f' theta = {self.theta},\n' + 
+             f' alpha = {self.alpha},\n' +
+             f' rho = {self.rho},\n' + 
+             f' epsilon = {self.epsilon},\n' + 
+             f' beta = {self.beta} \n)')
         )
         
     def _validate_params(self, alpha, beta, epsilon, theta, rho)->list:
@@ -108,11 +116,14 @@ class Neuron:
         slope_chk = all([p > 0 for p in [alpha, beta]])
         return float_chk, slope_chk
     
-    def _validate_attrib(self, pos, radius, valence, potential)->list:
+    def _validate_attrib(self, position, radius, valence, potential)->list:
         """Range and type checks for position, radius, valence, and potential parameters"""
-        if pos is not None:
-            pos_chk =\
-            (type(pos) == tuple) & all([type(p) in [float, int] for p in pos]) & (len(pos) == 2)
+        if position is not None:
+            pos_chk = (
+                (type(position) == tuple) & 
+                all([type(p) in [float, int] for p in position]) & 
+                (len(position) == 2)
+            )
         else: pos_chk = True
         rad_chk = (type(radius) in [float, int]) & (radius > 0)
         valence_chk = isinstance(valence, bool) | valence in [1, -1]   
@@ -162,6 +173,12 @@ class NeuriteOutgrowthNetwork:
         self.neuron_ls = neuron_ls if neuron_ls is not None else [Neuron(), Neuron()] 
         self.distance_mat = self._distance_mat_fn()
         self.H = H
+        
+    def __len__(self) -> int:
+        return len(self.neuron_ls)
+    
+    def __getitem__(self, position:int):
+        return self.neuron_ls[position]
         
     def _validate_input(self, neuron_ls):
         """Type check for elements of neuron_ls"""
