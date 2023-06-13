@@ -61,6 +61,29 @@ class STA:
     
     def __init__(self, event_list:list, stim_list:list, samp_pd:float=0.01, kernel_pd:float=0.10):
         
+        # type checks
+        for v in ['event_list', 'stim_list']:
+            if not isinstance(eval(v), (Sequence, np.ndarray)):
+                raise TypeError(v + ' should be of type Sequence or numpy.ndarray.')
+                
+        for v in ['samp_pd', 'kernel_pd']:
+            if not isinstance(eval(v), (int, float)):
+                raise TypeError(v + ' should be numeric.')
+                
+        # value checks
+        seq_vals = {'event_list': (int, bool, np.signedinteger, np.unsignedinteger)}
+        seq_vals.update({'stim_list':(*seq_vals['event_list'], float, np.floating)})
+        for k, v in seq_vals.items():
+            if not all([isinstance(k0, v) for k0 in eval(k)]):
+                raise ValueError(k + ' must contain numeric elements.')
+                
+        if not all(v0 >= 0 or v0 is None for v0 in event_list):
+            raise ValueError('elements of event_list must be non-negative integers.')
+            
+        for v in ['samp_pd', 'kernel_pd']:
+            if not eval(v) > 0:
+                raise ValueError(v + ' must be positive.')
+        
         self.rho = np.array(event_list) if isinstance(event_list, list) else event_list
         self.stim = np.array(stim_list) if isinstance(stim_list, list) else stim_list
         self.samp_pd = samp_pd
