@@ -1,5 +1,17 @@
 import numpy as np
 import pandas as pd
+from typing import Union, List, Dict
+from collections.abc import Sequence
+
+class Dummy:
+    
+    def __init__(n1, n2):
+        
+        if not isinstance(n1, int):
+            raise TypeError
+            
+        if not isinstance(n2, int):
+            raise TypeError
 
 class STA:
     """Estimates spike-triggered average stimulus from event data.
@@ -64,18 +76,21 @@ class STA:
         # type checks
         for v in ['event_list', 'stim_list']:
             if not isinstance(eval(v), (Sequence, np.ndarray)):
-                raise TypeError(v + ' should be of type Sequence or numpy.ndarray.')
+                raise TypeError(v + ' must be of type Sequence or numpy.ndarray.')
                 
         for v in ['samp_pd', 'kernel_pd']:
             if not isinstance(eval(v), (int, float)):
-                raise TypeError(v + ' should be numeric.')
-                
-        # value checks
+                raise TypeError(v + ' must be numeric.')
+        
         seq_vals = {'event_list': (int, bool, np.signedinteger, np.unsignedinteger)}
         seq_vals.update({'stim_list':(*seq_vals['event_list'], float, np.floating)})
         for k, v in seq_vals.items():
             if not all([isinstance(k0, v) for k0 in eval(k)]):
-                raise ValueError(k + ' must contain numeric elements.')
+                raise TypeError(k + ' must contain numeric elements.')
+        
+        # value checks
+        if len(event_list) != len(stim_list):
+            raise ValueError('event_list and stim_list must have same length')
                 
         if not all(v0 >= 0 or v0 is None for v0 in event_list):
             raise ValueError('elements of event_list must be non-negative integers.')
